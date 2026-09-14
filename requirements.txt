@@ -1,3 +1,6 @@
+pandas #not necessary for the project but useful for data manipulation
+numpy 
+matplotlib #not necessary for the project but useful for data visualization
 appnope==1.0.0
 asttokens==3.0.2
 attrs==26.1.0

@@ -1,0 +1,1500 @@
+%%
+%% This is file `fca.sty',
+%% generated with the docstrip utility.
+%%
+%% The original source files were:
+%%
+%% latex-fca.dtx  (with options: `fca.sty,cxtinput.sty,package')
+%%  latex-fca.dtx
+%%  Copyright ℂ 2022 Ernst-Schröder-Zentrum
+%%                   für Begriffliche Wissensverarbeitung
+%%  Authors: Bernhard Ganter
+%%           Tobias Schlemmer
+%% 
+%%  This program is provided under the terms of the
+%%  LaTeX Project Public License distributed from CTAN
+%%  archives in directory macros/latex/base/lppl.txt.
+%% 
+%%  This work is "maintained" (as per LPPL maintenance status) by
+%%  Tobias Schlemmer <keinstein@users.sf.net>.
+%% 
+%%  This work consists of the files
+%%    latex-fca.dtx and
+%%    latex-fca.ins
+%% 
+%%  and the derived files
+%%    fca.sty,
+%%    formula0.cxt,
+%%    formula1.cxt.
+%% 
+%% \CharacterTable
+%%  {Upper-case    \A\B\C\D\E\F\G\H\I\J\K\L\M\N\O\P\Q\R\S\T\U\V\W\X\Y\Z
+%%   Lower-case    \a\b\c\d\e\f\g\h\i\j\k\l\m\n\o\p\q\r\s\t\u\v\w\x\y\z
+%%   Digits        \0\1\2\3\4\5\6\7\8\9
+%%   Exclamation   \!     Double quote  \"     Hash (number) \#
+%%   Dollar        \$     Percent       \%     Ampersand     \&
+%%   Acute accent  \'     Left paren    \(     Right paren   \)
+%%   Asterisk      \*     Plus          \+     Comma         \,
+%%   Minus         \-     Point         \.     Solidus       \/
+%%   Colon         \:     Semicolon     \;     Less than     \<
+%%   Equals        \=     Greater than  \>     Question mark \?
+%%   Commercial at \@     Left bracket  \[     Backslash     \\
+%%   Right bracket \]     Circumflex    \^     Underscore    \_
+%%   Grave accent  \`     Left brace    \{     Vertical bar  \|
+%%   Right brace   \}     Tilde         \~}
+\NeedsTeXFormat{LaTeX2e}[1999/12/01]
+\ProvidesPackage{fca}
+    [2022/09/17 v3.0
+Formal Concept Analysis macros]
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\newif\iffca@compat@macros
+\fca@compat@macrosfalse
+\DeclareOption{compat}{%
+  \fca@compat@macrostrue
+}
+\DeclareOption{nocompat}{%
+  \fca@compat@macrosfalse
+}
+\ProcessOptions\relax
+\RequirePackage{pgf}
+\usepgflibrary{shapes.geometric}
+\RequirePackage{amssymb,graphics,color,ifthen,rotating,xspace}%%
+\@ifundefined{AfterPackage}{%
+  \RequirePackage{afterpackage}%
+}{}%
+\AfterPackage{tikz}{%
+  \usetikzlibrary{fca}%
+}%
+\newcommand*\fca@parselength[3]{%
+  \pgfmathparse{#2}%
+  \ifpgfmathunitsdeclared
+    #1=\pgfmathresult pt\relax
+  \else
+    #1=\pgfmathresult#3%
+  \fi
+}
+\newcommand{\fca@cxt@Kreuz}{$\times$}%
+\newcommand{\fca@cxt@Punkt}{}%
+\iffca@compat@macros
+  \newcommand{\cxtArrowStyle}{\footnotesize}
+  \def\fcaCxtArrowStyle{\cxtArrowStyle}
+\else
+  \newcommand{\fcaCxtArrowStyle}{\footnotesize}
+\fi
+\newcommand{\fca@cxt@down}{\fcaCxtArrowStyle$\Runterpfeil$}%
+\newcommand{\fca@cxt@up}{\fcaCxtArrowStyle$\Hochpfeil$}%
+\newcommand{\fca@cxt@both}{\fcaCxtArrowStyle$\Doppelpfeil$}%
+\newcounter{fca@cxt@mAnz}%
+\newboolean{fca@cxt@ttributes}%
+\newlength{\fca@cxt@nameraise}%
+\newlength{\fca@cxt@ttnameheight}%
+\newcommand{\adjcxt@name}{%
+  \ifthenelse{\fca@cxt@nameraise<\fca@cxt@ttnameheight}%
+  {\setlength{\fca@cxt@nameraise}{\fca@cxt@ttnameheight}}{}}%
+\newcommand{\fcaCxtAlignBottom}{\def\fca@cxt@align{b}}
+\newcommand{\fcaCxtAlignCenter}{\def\fca@cxt@align{t}}
+\newcommand{\fcaCxtAlignTop}{\def\fca@cxt@align{t}}
+\newcommand{\fcaCxtName}[1]{%
+  \def\fca@cxtn@me{%
+    \multicolumn{1}{|c||}{%
+      \settoheight{\fca@cxt@ttnameheight}{#1}%
+      \addtolength{\fca@cxt@nameraise}{-1\fca@cxt@ttnameheight}%
+      \raisebox{.5\fca@cxt@nameraise}{#1}%
+    }%
+  }%
+  \ignorespaces
+}%
+\iffca@compat@macros
+  \newcommand{\cxtName}{\fcaCxtName}
+\fi
+\newcommand{\fca@cxt@att}[1]{%
+  \ifthenelse{\boolean{fca@cxt@ttributes}}{%
+    \settoheight{\fca@cxt@ttnameheight}{#1}\adjcxt@name%
+    \expandafter\def\expandafter\fca@cxt@tabtop\expandafter{%
+      \fca@cxt@tabtop&#1}%
+    \stepcounter{fca@cxt@mAnz}%
+  }{%
+    \PackageWarning{fca}{Attribute following object in
+      cxt-environment%
+      has been ignored}{}}%
+  \ignorespaces }%
+
+\newcommand{\fca@cxt@atr}[1]{\att{\rotatebox{90}{#1~~}}}%
+\newcommand{\fca@cxt@obj}[2]{%
+  \fca@cxt@tabdef
+  #2\strut
+  \fca@cxt@Line{#1}%
+  \\
+}%
+\newcommand{\fca@cxt@freeobj}[2]{%acrocod}
+  \fca@cxt@tabdef%
+  #2&#1\\\hline }%
+\def\fca@cxt@tabtop{}
+\def\fca@cxt@tabdef@@{%
+  \expandafter\fca@cxt@tabdef@\fca@cxt@align
+  \fca@cxtn@me%&%
+  \fca@cxt@tabtop\strut\\\hline\hline
+}
+\def\fca@cxt@tabdef@#1{%
+  \def\fca@cxt@tabdef{\hline}%
+  \tabcolsep0.5ex\relax%
+  \begin{tabular}[#1]{|l||*{\value{fca@cxt@mAnz}}{c|}}%
+    \hline%
+    }%
+    \newenvironment{cxt}[1][t]{%
+    \begingroup
+    \fca@cxt@resetDefaults
+    \def\fca@cxt@align{#1}%
+    \ignorespaces
+    }{%
+    \fca@cxt@tabdef% open the tabular in case there are no objects
+  \end{tabular}%
+  \endgroup }%
+\newcommand{\fca@cxt@resetDefaults}{%
+  \setlength{\fca@cxt@nameraise}{0pt}%
+  \setlength{\fca@cxt@ttnameheight}{0pt}%
+  \setcounter{fca@cxt@mAnz}{0}%
+  \setboolean{fca@cxt@ttributes}{true}%
+  \let\cxtName\fcaCxtName
+  \let\alignBottom\fcaCxtAlignBottom
+  \let\alignCenter\fcaCxtAlignCenter
+  \let\alignTop   \fcaCxtAlignTop
+  \let\att\fca@cxt@att
+  \let\atr\fca@cxt@atr
+  \let\obj\fca@cxt@obj
+  \let\freeobj\fca@cxt@freeobj
+  \let\cxtphantom\fca@cxt@phantom
+  \let\cxtrlap\fca@cxt@rlap
+  \let\fca@cxtn@me\@empty%
+  \let\fca@cxt@tabdef\fca@cxt@tabdef@@
+}%
+\def\fca@cxt@phantom{\phantom{\fca@cxt@Kreuz}}%
+\def\fca@cxt@rlap#1{%
+  \settowidth\@tempdima{\cxtphantom}%
+  \makebox[\@tempdima][c]{\hss #1\hss}%
+}
+\def\fca@cxt@M@kechar@newcommand{%
+  \newcommand*%
+}
+\def\fca@cxt@Makechar@newcommand#1{%
+  \expandafter \fca@cxt@M@kechar@newcommand \csname cxt@char@\string#1 \endcsname
+}
+\def\fcaNewContextCh@r@#1[#2][#3]#4{%
+  \fca@cxt@Makechar@newcommand{#1}[{#2}][{#3}]{#4\fca@cxt@read@line}%
+}%
+\def\fcaNewContextCh@r#1[#2]#3{%
+  \fca@cxt@Makechar@newcommand{#1}[{#2}]{#3\fca@cxt@read@line}%
+}%
+\def\fcaNewContextChar@@#1[#2]{%
+  \@ifnextchar[{\fcaNewContextCh@r@{#1}[{#2}]}{\fcaNewContextCh@r{#1}[{#2}]}%
+}%
+\def\fcaNewContextChar@#1#2{%
+  \fca@cxt@Makechar@newcommand{#1}{#2\fca@cxt@read@line}%
+}%
+\def\fcaNewContextChar#1{%
+  \@ifundefined{cxt@char@\string#1 }{}{%
+    \PackageError{fca}{The character `\string#1' is already defined.}%
+    \expandafter\let
+    \csname cxt@char@\string#1 \endcsname\@undefined
+  }%
+  \@ifnextchar[{\fcaNewContextChar@@{#1}}{\fcaNewContextChar@{#1}}%
+}
+\def\fca@cxt@M@kechar@providecommand{%
+  \providecommand*%
+}
+\def\fca@cxt@Makechar@providecommand#1{%
+  \expandafter \fca@cxt@M@kechar@providecommand \csname cxt@char@\string#1 \endcsname
+}
+\def\fcaProvideContextCh@r@#1[#2][#3]#4{%
+  \fca@cxt@Makechar@providecommand{#1}[{#2}][{#3}]{#4\fca@cxt@read@line}%
+}%
+\def\fcaProvideContextCh@r#1[#2]#3{%
+  \fca@cxt@Makechar@providecommand{#1}[{#2}]{#3\fca@cxt@read@line}%
+}%
+\def\fcaProvideContextChar@@#1[#2]{%
+  \@ifnextchar[{\fcaProvideContextCh@r@{#1}[{#2}]}{\fcaProvideContextCh@r{#1}[{#2}]}%
+}%
+\def\fcaProvideContextChar@#1#2{%
+  \fca@cxt@Makechar@providecommand{#1}{#2\fca@cxt@read@line}%
+}%
+\def\fcaProvideContextChar#1{%
+  \@ifnextchar[{\fcaProvideContextChar@@{#1}}{\fcaProvideContextChar@{#1}}%
+}
+\def\fca@cxt@M@kechar@renewcommand{%
+  \renewcommand*%
+}
+\def\fca@cxt@Makechar@renewcommand#1{%
+  \expandafter \fca@cxt@M@kechar@renewcommand \csname cxt@char@\string#1 \endcsname
+}
+\def\fcaRenewContextCh@r@#1[#2][#3]#4{%
+  \fca@cxt@Makechar@renewcommand{#1}[{#2}][{#3}]{#4\fca@cxt@read@line}%
+}%
+\def\fcaRenewContextCh@r#1[#2]#3{%
+  \fca@cxt@Makechar@renewcommand{#1}[{#2}]{#3\fca@cxt@read@line}%
+}%
+\def\fcaRenewContextChar@@#1[#2]{%
+  \@ifnextchar[{\fcaRenewContextCh@r@{#1}[{#2}]}{\fcaRenewContextCh@r{#1}[{#2}]}%
+}%
+\def\fcaRenewContextChar@#1#2{%
+  \fca@cxt@Makechar@renewcommand{#1}{#2\fca@cxt@read@line}%
+}%
+\def\fcaRenewContextChar#1{%
+  \@ifundefined{cxt@char@\string#1 }{%
+    \PackageError{fca}{The character `\string#1' is undefined.^^J
+      It must have been defined in order to be redefined.}%
+    \fcaNewContextChar{#1}{}%
+  }{}%
+  \@ifnextchar[{\fcaRenewContextChar@@{#1}}{\fcaRenewContextChar@{#1}}%
+}
+\def\fca@cxt@stop{}%
+\def\fca@cxt@executechar#1{%
+  &\@ifundefined{cxt@char@\string#1 }{%
+    \PackageWarning{fca}{Undefinded character \string#1 \space in the context}%
+    \let\fca@cxt@tmp=\fca@cxt@aPunkt%
+  }{%
+    \expandafter\let\expandafter\fca@cxt@tmp \csname
+    cxt@char@\string#1 \endcsname }%
+  \fca@cxt@tmp }
+\def\fca@cxt@read@line#1{%
+  \ifx#1\fca@cxt@stop \let\fca@cxt@zeile@excecutechar\@gobble \else
+  \let\fca@cxt@zeile@excecutechar\fca@cxt@executechar \fi
+  \fca@cxt@zeile@excecutechar{#1}%
+}%
+\def\fca@cxt@Line#1{%
+  \fca@cxt@read@line#1\fca@cxt@stop }%
+\fcaNewContextChar .{\cxtphantom}
+\fcaNewContextChar x{\fca@cxt@Kreuz}
+\fcaNewContextChar X{\fca@cxt@Kreuz}
+\fcaNewContextChar u{\cxtrlap{\fca@cxt@up}}
+\fcaNewContextChar d{\cxtrlap{\fca@cxt@down}}
+\fcaNewContextChar b{\cxtrlap{\fca@cxt@both}}
+\@for\tmp:= 0,1,2,3,4,5,6,7,8,9\do{
+  \edef\@tmp{
+    \noexpand\fcaNewContextChar\tmp{%
+      \noexpand\cxtrlap\tmp
+    }%
+  }%
+  \@tmp
+}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\newcount\fca@cxt@input@obj
+\newcount\fca@cxt@input@attr
+\newcount\fca@cxt@input@line
+\newtoks\fca@cxt@input@contextlines
+\fca@cxt@input@line0
+\fca@cxt@input@contextlines{}%
+\newcommand\cxtinput[1]{%
+  \fca@cxt@input@contextlines{}%
+  \fca@cxt@input@save@nl@active%
+  \fca@cxt@input@make@nl@active%
+  \fca@cxt@input@input{#1}%
+  \fca@cxt@input@restore@nl%
+  \xdef\fca@cxt@input@tempa{\the\fca@cxt@input@contextlines}%
+  %\aftergroup
+  \fca@cxt@input@tempa%
+}
+\def\fca@cxt@input@newline{}
+\def\fca@cxt@input@head{%
+ \fca@cxt@input@getline\fca@cxt@input@check@B
+}
+\def\fca@cxt@input@check@B#1{%
+  \def\tempa{B}\def\tempb{#1}%
+  \ifx\tempa\tempb
+  \typeout{Burmeister format detected}%
+  \else
+    \fca@cxt@input@error{No Burmeister format detected}{The \string\cxtinput macro can input Burmeister .cxt files only.}%
+  \fi
+  \def\fca@cxt@input@newline{%
+    \fca@cxt@input@getline{\fca@cxt@input@read@cxtname}%
+  }%
+}
+\def\fca@cxt@input@match@mptyline#1#2{%
+  \edef\tempa{#2}%
+  \ifx\tempa\@empty
+  \else
+    \fca@cxt@input@error{Error in Burmeister format.}{At the current position an empty line is expected.}%
+  \fi
+  \def\fca@cxt@input@newline{%
+    \fca@cxt@input@getline{#1}%
+  }%
+}
+\def\fca@cxt@input@read@cxtname#1{%
+  \ifx\fca@cxtn@me\@empty
+    \fcaCxtName{#1}%
+  \fi
+  \def\fca@cxt@input@newline{%
+    \fca@cxt@input@getline{\fca@cxt@input@readobjcount}%
+  }%
+}
+\def\fca@cxt@input@readobjcount#1{%
+ \fca@cxt@input@obj=#1\relax
+ \def\fca@cxt@input@newline{%
+   \fca@cxt@input@getline\fca@cxt@input@readattrcount%
+ }%
+}
+\def\fca@cxt@input@readattrcount#1{%
+  \def\fca@cxt@input@newline{%
+    \fca@cxt@input@getline{\fca@cxt@input@match@mptyline\fca@cxt@input@readobjects}%
+  }%
+  \fca@cxt@input@attr=#1\relax
+}
+\def\fca@cxt@input@readobjects{%
+  \ifnum\fca@cxt@input@obj>0\relax
+    \def\fca@cxt@input@newline{%
+      \fca@cxt@input@getline\fca@cxt@input@readobjname
+   }%
+   \@tempcnta=1\relax
+   \let\tempa\fca@cxt@input@readobjname%
+ \else
+    \let\tempa\fca@cxt@input@readattributes%
+  \fi
+ \tempa
+}
+\def\fca@cxt@input@readobjname#1{%
+   \expandafter\def\csname cxt@input@objname@\the\@tempcnta\endcsname{#1}%
+   \ifnum\@tempcnta < \fca@cxt@input@obj
+    \advance\@tempcnta by 1\relax
+ \else
+    \def\fca@cxt@input@newline{%
+      \fca@cxt@input@getline\fca@cxt@input@readattributes%
+    }%
+  \fi
+}
+\def\fca@cxt@input@readattributes{%
+  \ifnum\fca@cxt@input@attr>0\relax
+    \def\fca@cxt@input@newline{%
+      \fca@cxt@input@getline\fca@cxt@input@readattrname
+    }%
+    \@tempcnta=1\relax
+    \def\tempa{\fca@cxt@input@readattrname}%
+  \else
+    \def\tempa{\fca@cxt@input@readcontext}%
+  \fi
+  \tempa
+}
+\def\fca@cxt@input@readattrname#1{%
+  \fca@cxt@input@appendtotok{#1}\atr%
+  \ifnum\@tempcnta < \fca@cxt@input@attr
+    \advance\@tempcnta by 1\relax
+  \else
+    \def\fca@cxt@input@newline{%
+      \fca@cxt@input@getline\fca@cxt@input@readcontext
+    }%
+  \fi
+}
+\def\fca@cxt@input@readcontext{%
+  \ifnum\fca@cxt@input@obj>0\relax
+    \def\fca@cxt@input@newline{%
+      \fca@cxt@input@getline
+      \fca@cxt@input@readcontextline
+    }%
+    \@tempcnta=1\relax
+    \def\tempa{\fca@cxt@input@readcontextline}%
+  \else
+    \def\tempa{}%
+  \fi
+  \tempa
+}
+\def\fca@cxt@input@readcontextline#1{%
+  \expandafter\expandafter\expandafter\fca@cxt@input@appendtotok
+  \expandafter\expandafter\expandafter{%
+    \csname cxt@input@objname@\the\@tempcnta\endcsname}%
+  {\obj{#1}}%
+  \ifnum\@tempcnta < \fca@cxt@input@obj
+    \advance\@tempcnta by 1\relax
+  \else
+    \let\fca@cxt@input@newline\relax
+    \let\fca@cxt@input@endoffile\relax
+  \fi
+}
+\def\fca@cxt@input@appendtotok#1#2{%
+  \expandafter\fca@cxt@input@contextlines\expandafter{%
+    \the\fca@cxt@input@contextlines
+    #2{#1}%
+  }%
+}
+
+\def\fca@cxt@input@error#1#2{%
+  \PackageError{fca}{At line \the\fca@cxt@input@line : #1}{#2}%
+  \def\fca@cxt@input@newline{}%
+}%
+\def\fca@cxt@input@endoffile{%
+  \fca@cxt@input@error{unexpected end of file}{The context file is somehow
+    inconsistent.\MessageBreak The last lines of it seem to be lost.}%
+}
+\def\fca@cxt@input@@endoffile{\fca@cxt@input@endoffile}
+\begingroup%
+\catcode`\^^M\active%
+\gdef\fca@cxt@input@make@nl@active{%
+  \catcode`\^^M\active%
+}%
+
+\gdef\fca@cxt@input@save@nl@active{%
+  \chardef\fca@cxt@input@catcode@nl=\catcode`\^^M%
+}%
+\gdef\fca@cxt@input@restore@nl{%
+  \catcode`\^^M\fca@cxt@input@catcode@nl\relax%
+}%
+
+\fca@cxt@input@make@nl@active%
+\long\gdef\fca@cxt@input@getline #1#2^^M{%
+  \advance\fca@cxt@input@line by 1\relax%
+  \def\tempa{#2}%
+  \ifx\tempa\fca@cxt@input@@endoffile%
+    \tempa%
+  \fi%
+  #1{#2}%
+  \fca@cxt@input@newline%
+}%
+\gdef\fca@cxt@input@input#1{%
+  \expandafter\fca@cxt@input@head\@@input #1 %
+  \fca@cxt@input@endoffile%
+}
+\endgroup%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\newcommand{\fca@Defaults}{% Do not change this line!  %
+  \newcommand{\fcaObjectLabelStyle}{%
+    \small\baselineskip1em\rmfamily\upshape%
+  }% %
+  \newcommand{\fcaAttributeLabelStyle}{%
+    \small\baselineskip1em\rmfamily\itshape
+  }% %
+  \newcommand{\fcaLabelBoxWidth}{40mm}%
+  \let\Node\fca@node
+  \let\Edge\fca@edge
+  \iffca@compat@macros
+  \else
+    \def\ObjectLabelStyle{\fcaObjectLabelStyle}%
+    \def\AttributeLabelStyle{\fcaAttributeLabelStyle}%
+    \let\LabelBoxWidth\fcaLabelBoxWidth
+    \let\EdgeThickness\fcaEdgeThickness
+    \let\NodeThickness\fcaNodeThickness
+    \let\Numbers\fcaNumbers
+    \let\noNumbers\fcaNoNumbers
+    \let\NodeColor\fcaNodeColor
+    \let\ColorNode\fcaColorNode
+    \let\NoDots\fcaNoDots
+    \let\Dots\fcaDots
+  \fi
+  \let\leftAttbox\fca@leftAttbox
+  \let\centerAttbox\fca@centerAttbox
+  \let\rightAttbox\fca@rightAttbox
+  \let\leftObjbox\fca@leftObjbox
+  \let\centerObjbox\fca@centerObjbox
+  \let\rightObjbox\fca@rightObjbox
+}% %
+\newboolean{fca@connectors}\setboolean{fca@connectors}{true}% %
+\iffca@compat@macros
+  \newcommand{\diagramXoffset}{0}% %
+  \newcommand{\diagramYoffset}{0}% %
+  \newcommand{\fcaDiagramXoffset}{\diagramXoffset}% %
+  \newcommand{\fcaDiagramYoffset}{\diagramYoffset}% %
+\else
+  \newcommand{\fcaDiagramXoffset}{0}% %
+  \newcommand{\fcaDiagramYoffset}{0}% %
+\fi
+\newcommand*{\fca@xunitlength}{\unitlength}%
+\newcommand*{\fca@yunitlength}{\unitlength}%
+\newcommand*{\fca@edge@thickness}{.8pt}% %
+\newcommand*{\fca@node@thickness}{1pt}% %
+\newcommand*{\fca@transform}{}%
+\newcommand*{\fca@options}{}%
+\newcommand*{\fca@defaultoptions}{}%
+\newcommand*{\fca@usepath}{}%
+\newcommand*{\fca@node@number@prefix}{\pgfkeysvalueof{/fca/namespace}\space node\space}%
+\newcommand*{\fca@node@number@suffix}{\space number}%
+\newcommand*{\fca@label@edge@width}{\@wholewidth}%
+\newcommand*{\fca@label@at}{center}% anchor of node
+\newcommand*{\fca@label@shift@x}{0pt}%
+\newcommand*{\fca@label@shift@y}{0pt}%
+\newcommand*{\fca@label@shift@x@sign}{}
+\newcommand*{\fca@label@shift@y@sign}{}
+\newcommand*{\fca@label@type}{attributes}%
+\newcommand*{\fca@label@position}{right}%
+
+\newcommand*\fca@none{none}
+\newcommand*\fca@firstofthree[3]{#1}
+\newcommand*\fca@secondofthree[3]{#2}
+\newcommand*\fca@thirdofthree[3]{#3}
+\newcommand*\fca@testoption[1]{%
+  \def\fca@tempa{#1}%
+  \ifx\empty\fca@tempa
+    \let\fca@tempb\fca@thirdofthree
+  \else
+    \def\fca@tempb{\pgfkeysnovalue}%
+    \ifx\fca@tempa\fca@tempb
+      \let\fca@tempb\fca@thirdofthree
+    \else
+      \ifx\fca@tempa\fca@none
+        \let\fca@tempb\fca@secondofthree
+      \else
+        \let\fca@tempb\fca@firstofthree
+      \fi
+    \fi
+  \fi
+  \fca@tempb
+}
+\newcommand*\fcaLayer[2]{%
+  \def\@tempa{main}%
+  \edef\@tempb{#2}%
+  \ifx\@tempb\@empty\let\@tempb\@tempa\fi
+  \ifx\@tempa\@tempb
+    \def\@tempa{}%
+    \def\@tempb{}%
+  \else
+    \def\@tempa{%
+      \begin{pgfonlayer}{#2}%
+      }
+    \def\@tempb{%
+      \end{pgfonlayer}%
+    }
+  \fi
+  \expandafter\let\csname fca@#1layer\endcsname\@tempa
+  \expandafter\let\csname fca@end#1layer\endcsname\@tempb
+}
+\newcommand*{\fca@labelslayer}{\csname fca@\fca@label@type layer\endcsname}
+\newcommand*{\fca@endlabelslayer}{\csname fca@end\fca@label@type layer\endcsname}
+\newcommand*{\fca@labelconceptslayer}{\csname fca@\fca@label@type conceptlayer\endcsname}
+\newcommand*{\fca@endlabelconceptslayer}{\csname fca@end\fca@label@type conceptlayer\endcsname}
+\newcommand*{\fcaNewLayer}[2]{%
+  \pgfdeclarelayer{#2}%
+  \fcaLayer{#1}{#2}%
+}
+\newcommand*{\fcaDeclareLayers}{%
+  \fcaLayer{nodes}{main}
+  \fcaNewLayer{nodenumbers}{\pgfkeysvalueof{/fca/namespace} node numbers}
+  \fcaNewLayer{attributes}{\pgfkeysvalueof{/fca/namespace} attributes}
+  \fcaNewLayer{objects}{\pgfkeysvalueof{/fca/namespace} objects}
+  \fcaNewLayer{attributesconcept}{%
+    \pgfkeysvalueof{/fca/namespace} attribute concepts}
+  \fcaNewLayer{objectsconcept}{%
+    \pgfkeysvalueof{/fca/namespace} object concepts}
+  \fcaNewLayer{edges}{\pgfkeysvalueof{/fca/namespace} edges}
+  \fcaNewLayer{connectors}{\pgfkeysvalueof{/fca/namespace} connectors}
+  \pgfdeclarelayer{\pgfkeysvalueof{/fca/namespace} above nodes}
+  \pgfdeclarelayer{\pgfkeysvalueof{/fca/namespace} below nodes}
+}
+\newcommand*{\fcaSetLayers}{%
+  \pgfsetlayers{%
+    \pgfkeysvalueof{/fca/namespace} edges,%
+    \pgfkeysvalueof{/fca/namespace} connectors,%
+    \pgfkeysvalueof{/fca/namespace} below nodes,%
+    main,%
+    \pgfkeysvalueof{/fca/namespace} above nodes,%
+    \pgfkeysvalueof{/fca/namespace} node numbers,%
+    \pgfkeysvalueof{/fca/namespace} attribute concepts,%
+    \pgfkeysvalueof{/fca/namespace} object concepts,%
+    \pgfkeysvalueof{/fca/namespace} attributes,%
+    \pgfkeysvalueof{/fca/namespace} objects%
+  }%
+}
+\newcommand*\fcaNoLayers{%
+  \fcaLayer{nodes}{main}%
+  \fcaLayer{nodenumbers}{main}%
+  \fcaLayer{attributes}{main}%
+  \fcaLayer{objects}{main}%
+  \fcaLayer{attributesconcept}{main}%
+  \fcaLayer{objectsconcept}{main}%
+  \fcaLayer{edges}{main}%
+  \fcaLayer{connectors}{main}%
+}
+\fcaNoLayers
+\newcommand*{\fcaLayers}{%
+  \fcaDeclareLayers
+  \fcaSetLayers
+}
+\newcommand\fca@dolabelposition{%
+  \pgfkeysgetvalue{/fca/label/type}{\@tempa}%
+  \pgfkeysgetvalue{/fca/label/position}{\@tempb}%
+  \ifx\pgfnovalue\@tempa
+  \else
+    \ifx\pgfnovalue\@tempb
+    \else
+      \pgfkeysalso{/fca/label/\@tempa{} position=\@tempb}%
+    \fi
+  \fi
+}
+
+\newcommand*\fcaNewLabelType{%
+  \@ifstar{\fca@NewLabelType}{\fca@NewL@belType}%\fistar
+}
+\newcommand*\fca@NewLabelType[1]{%
+  \pgfqkeys{/fca/label}{%
+    type/#1/.style={type=#1},
+    #1 position/.is choice,
+  }%
+}
+\newcommand*\fca@NewL@belType[1]{%
+  \fca@NewLabelType{#1}%
+  \pgfqkeys{/fca/label}{%
+    #1/.style={type=#1}%
+  }%
+}
+\newcommand*\fcaNewLabelPosition{%
+  \@ifstar{\fca@NewLabelPosition}{\fca@NewL@belPosition}%\fistar
+}
+\newcommand*\fca@NewLabelPosition[1]{%
+  \pgfqkeys{/fca/label}{%
+    position/#1/.style={position=#1},
+  }%
+}
+\newcommand*\fca@NewL@belPosition[1]{%
+  \fca@NewLabelPosition{#1}%
+  \pgfqkeys{/fca/label}{%
+    #1/.style={position=#1}%
+  }%
+}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\newcommand*\fca@generate@tikz@parameter[3]{%
+  \pgfqkeys{/fca/#1}{.initial={#2},.value required}
+}
+\newcommand*\fca@generate@tikz@parameters{%
+  \@for \fca@tmp:=%
+  {font}{}{\tikz@textfont},%
+  {node font}{}{\tikz@node@textfont},%
+  {text opacity}{}{\tikz@textopacity},%
+  {text width}{\pgfkeysnovalue}{\tikz@text@width},%
+  {text height}{}{\tikz@text@height},
+  {text depth}{}{\tikz@text@depth},
+  {text action}{}{\tikz@text@action},
+  {options}{}{\tikz@options},%\newcommand*{\fca@node@fill}{white}%
+  {anchor}{}{\tikz@anchor},
+  {shape}{}{\tikz@shape}
+  \do {
+    \expandafter\fca@generate@tikz@parameter\fca@tmp
+  }
+}
+\fca@generate@tikz@parameters
+\newcommand*\fcaset{\pgfqkeys{/fca}}
+
+\newcommand\fca@append[2]{%
+  \expandafter\def\expandafter#1\expandafter{#1#2}%
+}
+\newcommand\fca@concat[2]{%
+  \expandafter\fca@append\expandafter#1\expandafter{#2}%
+}
+
+\fcaset{%
+  connector/.is if=fca@connectors,
+  namespace/.initial=fca,
+  namespace/.value required,
+  name prefix/.initial=\pgfkeysvalueof{/fca/namespace}\space node\space,
+  name prefiv/.value required,
+  name suffix/.initial={},
+  name suffix/.value required,
+  every node/.style = {},
+  every concept/.style = {
+    radius = 2,
+    fill=white,
+    draw=black
+  },
+  every attributes/.style = {
+    font=\AttributeLabelStyle
+  },%\newcommand*{\fca@node@fill}{white}%%\newcommand*{\fca@node@fill}{white}%
+  every objects/.style = {
+    font=\ObjectLabelStyle
+  },
+  every edge/.style = {},
+  every label edge/.style = { dotted, draw=black },
+  font=\small\baselineskip1em\rmfamily,
+  shape/.initial=circle,
+  minimum width/.forward to=/pgf/minimum width,
+  minimum height/.forward to=/pgf/minimum height,
+  minimum size/.forward to=/pgf/minimum size,
+  inner xsep/.forward to=/pgf/inner xsep,
+  inner ysep/.forward to=/pgf/inner ysep,
+  inner sep/.forward to=/pgf/inner sep,
+  outer xsep/.forward to=/pgf/outer xsep,
+  outer ysep/.forward to=/pgf/outer ysep,
+  outer sep/.forward to=/pgf/outer sep,
+  radius/.code={
+    \fca@parselength\@tempdima{#1}\unitlength
+    \@tempdima=.70710678118654752440084436210484\@tempdima
+    \edef\@tempa{\noexpand\pgfkeysalso{/pgf/inner sep=\the\@tempdima}}%
+    \@tempa
+  },
+  % anchor/.store in=\fca@label@anchor,
+  % anchor/.value required,
+  node number/.style = { node font=\tiny, font=\tiny },
+  color/.code={\fca@append\fca@options{\color{#1}}},
+  line width/.code={%
+    \fca@append\fca@options{\pgfsetlinewidth{#1}}%
+    \pgfmathsetlength\pgflinewidth{#1}%
+  },
+  stroke/.code={%
+    \fca@testoption{#1}{%
+      \fca@append\fca@options{%
+        \pgfsetstrokecolor{#1}%
+      }%
+      \fca@append\fca@usepath{stroke,}%
+    }{%
+      \fca@append\fca@options{%
+        \let\pgf@up@stroke\pgfutil@empty
+      }%
+    }{%
+      \fca@append\fca@usepath{stroke,}%
+    }%
+  },
+  draw/.forward to=/fca/stroke,
+  fill/.code={%
+    \fca@testoption{#1}{%
+      \fca@append\fca@options{%
+        \pgfsetfillcolor{#1}%
+      }%
+      \fca@append\fca@usepath{fill,}%
+    }{%
+      \fca@append\fca@options{%
+        \let\pgf@up@fill\pgfutil@empty
+      }%
+    }{%
+      \fca@append\fca@usepath{fill,}%
+    }%
+  },
+  text/.initial=pgfstrokecolor,
+  text/.value required,
+  label type/.forward to=/fca/label/type,
+  label position/.forward to=/fca/label/position,
+  pgfnode/.initial={%
+    \pgfkeysvalueof{/fca/name prefix}%
+    \pgfkeysvalueof{/fca/node}%
+    \pgfkeysvalueof{/fca/name suffix}%
+  },
+  pgfnode/.value required,
+  node/.initial={},
+  node/.value required,
+  node contents/.initial={},
+  node contents/.value required,
+  shift/x/.store in=\fca@label@shift@x,
+  shift/x/.value required,
+  shift/y/.store in=\fca@label@shift@y,
+  shift/y/.value required,
+  shift/.value required,
+  shift/.style args={(#1,#2)}{%
+    /fca/shift/x=#1,
+    /fca/shift/y=#2
+  },%
+  shift/x/signv2.1/.store in=\fca@label@shift@x@sign,
+  shift/x/signv2.1/.value required,
+  shift/y/signv2.1/.store in=\fca@label@shift@y@sign,
+  shift/y/signv2.1/.value required,
+  rotate/.code={%
+    \fca@append\fca@transform{%
+      \pgftransformrotate{#1}%
+    }%
+  },
+  solid/.code={%
+    \fca@append\fca@options{%
+      \pgfsetdash{}{0pt}%
+    }%
+  },%
+  dotted/.code={%
+    \fca@append\fca@options{%
+      \pgfsetdash{{\pgflinewidth}{2pt}}{0pt}%
+    }%
+  },%
+  loosely dotted/.code={%
+    \fca@append\fca@options{%
+      \pgfsetdash{{\pgflinewidth}{4pt}}{0pt}%
+    }%
+  },%
+  densely dotted/.code={%
+    \fca@append\fca@options{%
+      \pgfsetdash{{\pgflinewidth}{4pt}}{0pt}%
+    }%
+  }%
+}
+\fcaset{%
+  every label/.style = {
+    text=pgfstrokecolor,
+    /pgf/outer sep=0pt,
+    /pgf/inner sep=0pt,
+  }
+}
+
+\pgfqkeys{/fca/node}{%
+  line width/.store in=\fca@node@thickness,
+  line width/.value required,
+  radius/.style={
+    /pgf/inner sep=#1
+  },
+  color/.initial={},
+  layer/.code=\fcalayer{node},%
+  numbers/.is if=fca@CircledNumbers,
+  number prefix/.store in=\fca@node@number@prefix,
+  number prefix/.value required,
+  number suffix/.store in=\fca@node@number@suffix,
+  number suffix/.value required,
+}
+
+
+
+\pgfqkeys{/fca/label}{%
+  name prefix/.initial=\pgfkeysvalueof{/fca/namespace}\space node\space,
+  name prefix/.value required,
+  name suffix/.initial=\space\fca@label@type\space\fca@label@position,
+  name suffix/.value required
+  fill/.store in=\fca@node@fill,
+  fill/.value required,
+  text width/.store in=\fca@label@text@width,
+  text width/.value required,
+  node font/.initial={},
+  node font/.value required,
+  edge width/.store in=\fca@label@edge@width,
+  edge width/.value required,
+  at/.store in=\fca@label@at,
+  at/.value required,
+  type/.store in=\fca@label@type,
+  type/.is choice,
+  type/.append code={%
+    \def\fca@label@type{#1}% the choice does not store the value
+    \pgfqkeysalso{/fca}{every #1/.try}%
+    \pgfqkeysalso{/fca/label}{\fca@label@type\space\fca@label@position}%
+  },
+  type/attributes/.style={},
+  type/objects/.style={},
+  position/.store in=\fca@label@position,
+  position/.is choice,
+  position/.append code={%
+    \def\fca@label@position{#1}% the choice does not store the value
+    \pgfqkeysalso{/fca/label}{\fca@label@type\space\fca@label@position}%
+  },
+  position/left/.style={},
+  position/right/.style={},
+  position/center/.style={},
+  %
+  attributes left/.style={
+    at=north west,
+    /fca/anchor=south east,
+    /fca/shift={(-1pt,1pt)},
+    /fca/shift/x/signv2.1=-,
+    /fca/shift/y/signv2.1={},
+    /fca/font/.append=\raggedleft
+  },
+  attributes center/.style={
+    at=north,
+    /fca/anchor=south,
+    /fca/shift={(0,1pt)},
+    /fca/shift/x/signv2.1={},
+    /fca/shift/y/signv2.1={},
+    /fca/font/.append=\centering
+  },
+  attributes right/.style={
+    at=north east,
+    /fca/anchor=south west,
+    /fca/shift={(1pt,1pt)},
+    /fca/shift/x/signv2.1={},
+    /fca/shift/y/signv2.1={},
+    /fca/font/.append=\raggedright
+  },
+  objects left/.style={
+    at=south west,
+    /fca/anchor=north east,
+    /fca/shift={(-1pt,-1pt)},
+    /fca/shift/x/signv2.1=-,
+    /fca/shift/y/signv2.1=-,
+    /fca/font/.append=\raggedleft
+  },
+  objects center/.style={
+    at=south,
+    /fca/anchor=north,
+    /fca/shift={(0,-1pt)},
+    /fca/shift/x/signv2.1={},
+    /fca/shift/y/signv2.1=-,
+    /fca/font/.append=\centering
+  },
+  objects right/.style={
+    at=south east,
+    /fca/anchor=north west,
+    /fca/shift={(1pt,-1pt)},
+    /fca/shift/x/signv2.1={},
+    /fca/shift/y/signv2.1=-,
+    /fca/font/.append=\raggedright
+  }
+}
+
+\newcommand*\fca@tikz@without@library{%
+  \PackageWarning{fca}{FCA TikZ integration is not activated.^^J
+    You should consider \tikzlibrary{fca} instead of
+    \string\usepackage{fca}
+  }%
+}
+
+\AtBeginDocument{%
+  \@ifundefined{tikz@color}{}{\fca@tikz@without@library}
+}
+
+\newcommand*{\fcaNodeThickness}[1]{%
+  \fcaset{node/line width={#1}}%
+  \ignorespaces
+}% %
+\newcommand*{\fcaEdgeThickness}[1]{%
+  \fcaset{line width={#1}}%
+  \ignorespaces
+}
+\newcommand*{\fcaNodeColor}[1]{%
+  \pgfkeyssetvalue{/fca/node/color}{#1}%
+  \ignorespaces
+}%
+\newcommand*{\fcaNumbers}{%
+  \setboolean{fca@CircledNumbers}{true}%
+}%
+\newcommand*{\fcaNoNumbers}{%
+  \setboolean{fca@CircledNumbers}{false}%
+}%
+\newcommand*{\fcaCircleSize}[1]{%
+  \fcaset{every concept/.append style={radius=(#1)*0.5\unitlength}}%
+  \ignorespaces
+}%
+\iffca@compat@macros
+  \def\fcaObjectLabelStyle{\fcaObjectLabelStyle}%
+  \def\fcaAttributeLabelStyle{\AttributeLabelStyle}%
+  \def\fcaLabelBoxWidth{\LabelBoxWidth}%
+  \def\EdgeThickness{\fcaEdgeThickness}%
+  \def\NodeThickness{\fcaNodeThickness}%
+  \def\NodeColor{\fcaNodeColor}%
+  \def\Numbers{\fcaNumbers}%
+  \def\noNumbers{\fcaNoNumbers}
+  \def\CircleSize{\fcaCircleSize}%
+  \def\NoDots{\fcaNoDots}
+  \def\Dots{\fcaDots}
+\fi
+\newcounter{fca@minNode}%
+\newcounter{fca@maxNode}%
+\newcounter{fca@runNode}%
+\newboolean{fca@CircledNumbers}%
+\newcounter{fca@CircleDiameter}%
+\newcounter{fca@AuxCounter}%
+\newcounter{fca@BuxCounter}%
+\def\fca@adjNode#1{%
+  \ifthenelse{#1<\value{fca@minNode}}{\setcounter{fca@minNode}{#1}}{}%
+  \ifthenelse{\value{fca@maxNode}<#1}{\setcounter{fca@maxNode}{#1}}{}}%
+\newcommand\fca@node[1][]{%
+  \@ifnextchar\bgroup{\fca@oldnode{#1}}{%
+      \@ifnextchar({\fca@pictnode{#1}}{\fca@tikznode{#1}}%)
+    }%
+}
+\newcommand\fca@typeset@node@content[1]{%
+  \pgfkeysgetvalue{/fca/text width}\@tempa
+  \edef\@tempb{\@tempa}%
+  \expandafter\fca@testoption\expandafter{\@tempb}{%
+    \def\fca@node@end@content{\end{minipage}}%
+    \fca@parselength\@tempdima{\fca@tempa}\fca@xunitlength
+    \begin{minipage}{\@tempdima}%
+  }{%
+    \let\fca@node@end@content\egroup
+    \makebox\bgroup%
+  }{%
+    \let\fca@node@end@content\egroup
+    \makebox\bgroup
+  }%
+  \pgfkeysvalueof{/fca/font}%
+  \color{\pgfkeysvalueof{/fca/text}}%
+  #1%
+  \fca@node@end@content%
+}
+\newcommand\fca@oldnode[4]{%
+  \begin{pgfscope}%
+    \fcaset{shape=circle,
+      line width=\fca@node@thickness}%
+    \fcaset{every node/.try}%
+    \pgfkeysgetvalue{/fca/node/color}{\fca@node@color}%
+    \expandafter\fca@testoption\expandafter{\fca@node@color}{%
+      \fca@append\fca@options{%
+        \expandafter\pgfsetfillcolor\expandafter{\fca@node@color}%
+      }%
+      \fca@append\fca@usepath{fill,}%
+    }{% none
+    }{% empty or \pgfkeysnovalue
+    }%
+    \fcaset{every concept/.try}%
+    \fcaset{#1}%
+    \fca@nodeslayer
+    \pgfkeysvalueof{/fca/node font}%
+    \fca@parselength\@tempdima{#3}\unitlength
+    \fca@parselength\@tempdimb{#4}\unitlength
+    \pgftransformshift{\pgfpoint{\@tempdima}{\@tempdimb}}%
+    \fca@options
+    % \pgfsetstrokecolor{\fca@node@color}%
+    \pgfnode{\pgfkeysvalueof{/fca/shape}}{center}{}{%
+      \pgfkeysvalueof{/fca/name prefix}#2\pgfkeysvalueof{/fca/name suffix}%
+    }{\expandafter\pgfusepath\expandafter{\fca@usepath}}%
+    \fca@endnodeslayer
+    \ifthenelse{\boolean{fca@CircledNumbers}}{%
+      \fca@nodenumberslayer
+      \def\fca@usepath{}%
+      \fcaset{node number}%
+      \fca@options
+      \pgfnode{\pgfkeysvalueof{/fca/shape}}{center}{%
+        \fca@typeset@node@content
+        {%
+          \centering
+          \pgfkeysvalueof{/fca/font}%
+          #2%
+        }%
+      }{%
+        \pgfkeysvalueof{/fca/name prefix}#2\pgfkeysvalueof{/fca/name
+          suffix} number%
+      }{\expandafter\pgfusepath\expandafter{\fca@usepath}}%
+      \fca@endnodenumberslayer
+    }{}%
+  \end{pgfscope}%
+  \ignorespaces
+}
+\newcommand\fca@pictnode[1]{%
+  \fca@parse@parenlabel{\fca@pictn@de{#1}}%
+}
+\newcommand\fca@pictn@de[2]{%
+  \fca@parse@paren@vector{%
+    \edef\fca@tempa{{\the\@tempdima}{\the\@tempdimb}}%
+    \def\fca@tempb{\fca@oldnode{#1}{#2}}%
+    \expandafter\fca@tempb\fca@tempa
+  }\@tempdima\@tempdimb
+}
+\newcommand{\fca@edge}[1][]{%
+  \@ifnextchar\bgroup{\fca@oldedge{#1}}{\fca@newedge{#1}}%
+}
+\newcommand\fca@newedge[1]{%
+  \fca@parse@parenlabel{\fca@new@dge{#1}}%
+}
+\newcommand\fca@new@dge[2]{%
+  \fca@parse@parenlabel{\fca@oldedge{#1}{#2}}%
+}
+\newcommand{\fca@oldedge}[3]{%
+  \begin{pgfscope}%
+    \fca@edgeslayer
+    \fcaset{every edge/.try,#1}%
+    \fca@options
+    \fca@transform
+    %\pgfsetlinewidth{\pgfkeysgetvalue{/fca/line width}}%
+    \pgfpathmoveto{%
+      \pgfpointshapeborder{%
+        \pgfkeysvalueof{/fca/name prefix}#2\pgfkeysvalueof{/fca/name suffix}%%
+      }{%
+        \pgfpointanchor{%
+          \pgfkeysvalueof{/fca/name prefix}#3\pgfkeysvalueof{/fca/name suffix}%%
+        }{center}%
+      }%
+    }%
+    \pgfpathlineto{%
+      \pgfpointshapeborder{%
+        \pgfkeysvalueof{/fca/name prefix}#3\pgfkeysvalueof{/fca/name suffix}%%
+      }{%
+        \pgfpointanchor{%
+        \pgfkeysvalueof{/fca/name prefix}#2\pgfkeysvalueof{/fca/name suffix}%%
+        }{center}%
+      }%
+    }%
+    \pgfusepath{stroke}%
+    \fca@endedgeslayer
+  \end{pgfscope}%
+  \ignorespaces
+}
+\def\fca@changeaValue#1#2#3{\setcounter{fca@AuxCounter}{#1}%
+  \addtocounter{fca@AuxCounter}{#2}\def#3{\value{fca@AuxCounter}}}%
+\def\fca@changebValue#1#2#3{\setcounter{fca@BuxCounter}{#1}%
+  \addtocounter{fca@BuxCounter}{#2}\def#3{\value{fca@BuxCounter}}}%
+\newcommand{\fcaNoDots}{\setboolean{fca@connectors}{false}}
+\newcommand{\fcaDots}{\setboolean{fca@connectors}{true}}
+
+\def\fca@parse@parenlabel#1(#2){#1{#2}}
+\def\fca@parse@paren@vector#1#2#3(#4,#5){%
+  \fca@parse@brace@vector{#1}{#2}{#3}{#4}{#5}%
+}
+\newcommand*\fca@parse@label[2]{%
+  \@ifnextchar\bgroup{%\egroup
+    #1%
+  }{%
+    \@ifnextchar(%)
+    {%
+      \fca@parse@parenlabel{#1}%
+    }{%
+      #2%
+    }%
+  }%
+}
+\newcommand*\fca@parse@vector[4]{%
+  \@ifnextchar(%)
+  {%
+    \fca@parse@paren@vector{#1}{#3}{#4}%
+  }{%
+    \@ifnextchar\bgroup{%\egroup
+      \fca@parse@brace@vector{#1}{#3}{#4}%
+    }{#2}%
+  }%
+}
+\newcommand*\fca@parse@brace@vector[5]{%
+  \fca@parselength#2{#4}\fca@xunitlength
+  \fca@parselength#3{#5}\fca@yunitlength
+  #1%
+}
+\newcommand*\fca@labelBox[1][]{%
+  \fca@parse@label{\fca@l@belBox{#1}}{\fca@@labelBox{#1}}%
+}
+\newcommand*\fca@l@belBox[2]{%
+  \@ifnextchar\bgroup{%
+    \fca@lab@lBox{#1}{#2}%
+  }{%
+    \@ifnextchar({%)
+      \fca@parse@vector{%
+        \def\fca@tempa{outer sep=1pt,#1,node=#2,shift=}%
+        \edef\fca@tempb{{(\the\@tempdima,\the\@tempdimb)}}%
+        \fca@concat\fca@tempa\fca@tempb%
+        \@ifnextchar\bgroup{%
+          \expandafter\fca@l@b@lBox\expandafter{\fca@tempa}%
+        }{%
+          \expandafter\fca@@labelBox\expandafter{\fca@tempa}%
+        }%
+      }{}{\@tempdima}{\@tempdimb}%
+    }{%
+      \fca@@labelBox{#1,node={#2}}%
+    }%
+  }%
+}
+\newcommand*\fca@lab@lBox[3]{%
+  \@ifnextchar\bgroup{%
+    \fca@parse@vector{%
+      \@ifnextchar\bgroup{%
+        \fca@oldlabelBox{#1,node=#2}{\the\@tempdima}{\the\@tempdimb}%
+      }{%
+        \fca@oldlabelBox{#1,node=#2}{\the\@tempdima}{\the\@tempdimb}{}%
+      }%
+    }{}{\@tempdima}{\@tempdimb}{#3}%
+  }{%
+    \fca@@labelBox{#1,node={#2},node contents={#3}}%
+  }%
+}
+\newcommand*\fca@l@b@lBox[2]{%
+  \fca@@labelBox{#1,node contents=#2}
+}
+\newcommand*\fca@label@shift@sign@{}%
+\expandafter\newcommand\expandafter*\csname fca@label@shift@sign@+\endcsname[1]{+(#1)}
+\expandafter\newcommand\expandafter*\csname fca@label@shift@sign@-\endcsname[1]{-(#1)}
+\newcommand*\fca@addshiftsign[1]{%
+  \expandafter\fca@@ddshiftsign\expandafter{\csname
+  fca@label@shift@#1@sign\endcsname}
+}
+\newcommand*\fca@@ddshiftsign[1]{%
+  \csname fca@label@shift@sign@#1\endcsname
+}
+
+\newcommand\fca@oldlabelBox[4]{%
+  \def\fca@tempa{%
+    #1,
+    label/at=center,
+    shift=
+  }%
+  \edef\fca@tempb{%
+    {({\noexpand\fca@addshiftsign x{#2}},{\noexpand\fca@addshiftsign y{#3}})}%
+  }%
+  \expandafter\expandafter\expandafter\fca@@labelBox
+  \expandafter\expandafter\expandafter{%
+    \expandafter\fca@tempa
+    \fca@tempb,
+    node contents={#4}%
+  }%
+}
+\newcommand\fca@remove@anchor[1]{%
+  \fca@remove@anch@r#1.\fca@remove@anchor%
+}
+\def\fca@remove@anch@r#1.#2\fca@remove@anchor{#1}
+\newcommand\fca@prepare@node[5]{%
+  \def\@tempa{\fca@split@node@{#1}{#2}{#3}{#4}}%
+  \edef\@tempb{#5.center.}%
+  \fca@concat\@tempa{\@tempb\fca@split@node@}%
+  \@tempa
+}
+\def\fca@split@node@#1#2#3#4#5.#6.#7\fca@split@node@{%
+  \def\@tempa{#7}%
+  \ifx\@tempa\empty\relax
+    \def#1##1{\pgfpointshapeborder{#3#5#4}{##1}}%
+  \else
+    \def#1##1{\pgfpointanchor{#3#5#4}{#6}}%
+  \fi
+  \def#2{%
+    \pgfpointanchor{#3#5#4}{#6}%
+  }%
+}
+\def\fca@def@expanded@node#1#2#3#4{%
+  \edef\@tempa{\noexpand\def\noexpand#1\noexpand\fca@node@full@node{#2}{#3}#4..\fca@node@fullnode}%
+  \@tempa
+}
+\def\fca@node@anchor#1.#2\fca@node@anchor{%
+  \pgfpointanchor{#1}{#2}%
+}
+\def\fca@node@border#1,#2.#3.#4\fca@node@border{%
+  \pgfpointshapeborder{#1}{\pgfpointanchor{#2}{#3}}%
+}
+\newcommand\fca@calculate@edgepoint[3]{%
+  \edef\@tempa{\noexpand\pfgutil@in@{.}{#2}}%
+  \@tempa
+  \ifpfgutil@in@
+    \def#1{%
+      \fca@node@anchor#2\fca@node@anchor
+    }%
+  \else
+    \def#1{%
+      \fca@node@border#2,#3.center.\fca@node@border
+    }%
+  \fi
+}
+\newcommand\fca@@labelBox[1]{%
+  \begin{pgfscope}%
+    \fcaset{every node/.try,
+      node font=\pgfkeysvalueof{/fca/label/node font},
+      every label/.try,#1}%
+    \fca@labelslayer
+    \pgfkeysvalueof{/fca/node font}%
+    \fca@options
+    \edef\@tempa{\pgfkeysvalueof{/fca/pgfnode}}%
+    \xdef\fca@temp@node@name{%
+      \expandafter\fca@remove@anchor\expandafter{\@tempa}%
+    }%
+    \pgftransformshift{%
+      \pgfpointanchor{%
+        \fca@temp@node@name
+      }{\fca@label@at}%
+    }%
+    \fca@parselength\@tempdima{\fca@label@shift@x}\unitlength
+    \fca@parselength\@tempdimb{\fca@label@shift@y}\unitlength
+    \pgftransformshift{\pgfpoint{\@tempdima}{\@tempdimb}}%
+    \fca@transform
+    \pgfnode{rectangle}{\pgfkeysvalueof{/fca/anchor}}{%
+      \fca@typeset@node@content
+      {%
+        \pgfkeysvalueof{/fca/node contents}%
+      }%
+    }{%
+      \pgfkeysvalueof{/fca/label/name prefix}%
+      \pgfkeysvalueof{/fca/node}%
+      \pgfkeysvalueof{/fca/label/name suffix}%
+    }{%
+      \expandafter\pgfusepath\expandafter{\fca@usepath}%
+    }%
+    \fca@endlabelslayer
+    % pin edge
+    \iffca@connectors
+      \fca@connectorslayer
+      \pgftransformreset
+      \let\fca@options\fca@defaultoptions
+      \fcaset{%
+        line width=\fca@label@edge@width
+      }
+      \fcaset{every label edge/.try}%
+      \fcaset{#1}%
+      \fca@options
+      \fca@transform
+      %\pgfsetlinewidth{\pgfkeysgetvalue{/fca/line width}}%
+      \fca@prepare@node\fca@temp@start@point\fca@temp@start@point@{}{}{\pgfkeysvalueof{/fca/pgfnode}}%
+      \fca@prepare@node\fca@temp@end@point\fca@temp@end@point@
+      {\pgfkeysvalueof{/fca/label/name prefix}}%
+      {\pgfkeysvalueof{/fca/label/name suffix}}%
+      {\pgfkeysvalueof{/fca/node}.\pgfkeysvalueof{/fca/anchor}}%
+      \pgfpathmoveto{\fca@temp@start@point\fca@temp@end@point@}%
+      \pgfpathlineto{\fca@temp@end@point\fca@temp@start@point@}%
+      \pgfusepath{stroke}%
+      \fca@endconnectorslayer
+    \fi
+    % overlay concept
+    \pgftransformreset
+    \let\fca@options\fca@defaultoptions
+    \pgfsetdash{}{0pt}%
+    \fcaset{shape=coordinate,#1}%
+    \fcaset{every label concept/.try}%
+    \fcaset{label concept/.try}%
+    \ifx\pgfkeysvalueof{/fca/shape}\pgfkeysnovalue
+    \else
+      \fca@labelconceptslayer
+      \pgftransformshift{%
+        \pgfpointanchor{%
+          \fca@temp@node@name
+        }{\fca@label@at}%
+      }%
+      \fca@transform
+      \fca@options
+      % \pgfsetstrokecolor{\fca@node@color}%
+      \pgfnode{\pgfkeysvalueof{/fca/shape}}{\pgfkeysvalueof{/fca/anchor}}{}{%
+        \pgfkeysvalueof{/fca/label/name prefix}%
+        \pgfkeysvalueof{/fca/node}%
+        \pgfkeysvalueof{/fca/label/name suffix}%
+      }{\expandafter\pgfusepath\expandafter{\fca@usepath}}%
+      \fca@endlabelconceptslayer
+    \fi
+  \end{pgfscope}%
+}
+\newcommand\fca@leftAttbox[1][]{%
+  \fca@labelBox[label type=attributes,label position=left,#1]
+}
+\newcommand\fca@centerAttbox[1][]{%
+  \fca@labelBox[label type=attributes,label position=center,#1]
+}
+\newcommand\fca@rightAttbox[1][]{%
+  \fca@labelBox[label type=attributes,label position=right,#1]
+}
+\newcommand\fca@leftObjbox[1][]{%
+  \fca@labelBox[label type=objects,label position=left,#1]
+}
+\newcommand\fca@centerObjbox[1][]{%
+  \fca@labelBox[label type=objects,label position=center,#1]
+}
+\newcommand\fca@rightObjbox[1][]{%
+  \fca@labelBox[label type=objects,label position=right,#1]
+}
+\def\fca@ResetDefaults{\setcounter{fca@minNode}{60}%
+  \setcounter{fca@maxNode}{0}%
+  \setcounter{fca@CircleDiameter}{4}%
+  \setboolean{fca@CircledNumbers}{false}%
+  \fca@Defaults}%
+\def\fcaColorNode#1{{%
+    \PackageWarning{fca}{The \string\ColorNode\space macro is
+      deprecated.^^J
+      Use `\string\Node[fill=#1]` instead}
+    \linethickness{\fca@node@thickness}%
+    \color{#1}{\circle*{\value{fca@CircleDiameter}}}%
+    \color{black}{\circle{\value{fca@CircleDiameter}}}}}%
+\def\fca@circle{{%
+    \linethickness{\fca@node@thickness}%
+    \color{\fca@node@fill}{\circle*{\value{fca@CircleDiameter}}}%
+    \color{black}{\circle{\value{fca@CircleDiameter}}}}}%
+\def\fca@DrawCircles{\setcounter{fca@runNode}{\value{fca@minNode}}%
+  \stepcounter{fca@maxNode}%
+  \whiledo{\value{fca@runNode}<\value{fca@maxNode}}%
+  {\fca@getNode{\value{fca@runNode}}%
+    \put(\fca@x,\fca@y){\fca@circle}%
+    \ifthenelse{\boolean{fca@CircledNumbers}}%
+    {\put(\fca@x,\fca@y){\makebox(0,0){\tiny\arabic{fca@runNode}}}}{}%
+    \stepcounter{fca@runNode}}}%
+
+\newcommand*\fca@setb@undingbox{%
+}%
+\newcommand*\fca@ignoreboundingbox{}%
+
+\newcommand*\fca@olddiagram[2]{%
+  \fca@parselength\@tempdima{#1}\unitlength
+  \edef\fca@right@border{\the\@tempdima}%
+  \fca@parselength\@tempdimb{#2}\unitlength
+  \edef\fca@top@border{\the\@tempdimb}%
+  \let\fca@boundingbox\fca@setboundingbox
+  \fca@parselength\@tempdima{-(\fcaDiagramXoffset)}\unitlength%
+  \edef\fca@left@border{\the\@tempdima}%
+  \fca@parselength\@tempdima{-(\fcaDiagramYoffset)}\unitlength%
+  \edef\fca@bottom@border{\the\@tempdima}%
+  \fca@startdiagram
+  \fca@setboundingbox{\fca@left@border}{\fca@bottom@border}
+  {\fca@right@border}{\fca@top@border}%
+}
+\newcommand*\fca@diagram{%
+  \@ifnextchar(\fca@diagr@m\fca@di@gram
+}
+\newcommand*\fca@diagr@m{%(#1,#2)
+  \PackageError{fca}{not implemented}{not implemented}%
+}
+\newcommand*\fca@di@gram{%
+  \fca@startdiagram
+}
+\newcommand*\fca@startdiagram{%
+  \fca@begindiagram
+  \fca@Defaults
+}
+\newcommand*\fca@setboundingbox[4]{%
+  \pgfpathrectangle{\pgfpoint{#1}{#2}}{\pgfpoint{#3}{#4}}%
+  \pgfusepath{use as bounding box}%
+}
+\newenvironment{diagram}[1][]
+{%
+  \ifpgfpicture
+    \def\fca@begindiagram{%
+      \begin{pgfscope}%
+        \fcaset{#1}%
+        \unitlength=\dimexpr\pgf@xx+\pgf@yx\relax
+        \def\fca@enddiagram{%
+          \end{pgfscope}%
+        }%
+    }%
+  \else
+    \def\fca@begindiagram{%
+      \begin{pgfpicture}%
+        \fcaset{#1}%
+        \def\fca@enddiagram{\end{pgfpicture}}%
+    }%
+  \fi
+  \noindent
+  \@ifnextchar\bgroup\fca@olddiagram\fca@diagram% This line must be
+                                % executed before \begin{pgfpicture}
+}%
+{%
+  %\fca@DrawCircles
+  \fca@enddiagram%
+}%
+\providecommand{\GMI}{(G,M,\relI)}
+\newcommand{\context}[1][K]{\ensuremath{\mathbb{#1}}}
+\providecommand{\'}{\ensuremath{\sp\prime}}% derivation operator
+\providecommand{\extent}[1]{\textrm{ext}(#1)}
+\providecommand{\intent}[1]{\textrm{int}(#1)}
+\providecommand{\extents}[1]{\textrm{Ext}(#1)}
+\providecommand{\intents}[1]{\textrm{Int}(#1)}
+\providecommand{\BV}{\underline{{\mathfrak B}}}
+\providecommand{\CL}{\BV}
+\providecommand{\BGMI}{{\mathfrak B} (G,M,\relI)}
+\providecommand{\CGMI}{\BGMI}
+\providecommand{\BVGMI}{\BV (G,M,\relI)}
+\providecommand{\CLGMI}{\BVGMI}
+\providecommand{\HNI}{(H,N,\relI \cap\; H{\times}N)}
+\providecommand{\relI}{\mathrel{I}}
+\providecommand{\notI}{\mathrel{\mbox{\rlap{\char'40}%
+      {\it I}\hspace*{-0.09em}\raisebox{.27ex}{\char'40}}}}%
+\providecommand{\bigtimes}{\mathop{%
+    \mathchoice{\raisebox{-2pt}{\huge$\times$}}{\mbox{\LARGE$\times$}}%
+    {\raisebox{0pt}{\Large$\times$}}{\times}}\displaylimits}%
+\providecommand{\Runterpfeil}{\mathrel{\swarrow}}
+\providecommand{\DownArrow}{\Runterpfeil}
+\providecommand{\Hochpfeil}{\mathrel{\nearrow}}
+\providecommand{\UpArrow}{\Hochpfeil}
+\providecommand{\IRunterpfeil}{\mathrel{\searrow}}
+\providecommand{\IDownArrow}{\IRunterpfeil}
+\providecommand{\IHochpfeil}{\mathrel{\nwarrow}}
+\providecommand{\IUpArrow}{\IHochpfeil}
+\providecommand{\Doppelpfeil}{\mathrel{\!\!\rlap{$\;\nearrow$}\swarrow}}
+\providecommand{\DoubleArrow}{\Doppelpfeil}
+\newcommand{\DDPfeil}{\mathrel{\mathchoice%
+    {\mbox{$\displaystyle\swarrow\hspace{-.7em}\swarrow$}}
+    {\mbox{$\textstyle\swarrow\hspace{-.7em}\swarrow$}}
+    {\mbox{$\scriptstyle\swarrow\hspace{-.5em}\swarrow$}}
+    {\mbox{$\scriptscriptstyle\swarrow\hspace{-.35em}\swarrow$}}}}
+\newcommand{\NDDPfeil}{\mathrel{\mathchoice%
+    {\mbox{$\displaystyle\swarrow\hspace{-.7em}\swarrow%
+        \hspace{-1.2em}\backslash\hspace{.4em}$}}
+    {\mbox{$\textstyle\swarrow\hspace{-.7em}\swarrow
+        \hspace{-1.1em}\backslash\hspace{.4em}$}}
+    {\mbox{$\scriptstyle\swarrow\hspace{-.5em}\swarrow
+        \hspace{-.6em}\backslash\hspace{.2em}$}}
+    {\mbox{$\scriptscriptstyle\swarrow\hspace{-.35em}\swarrow
+        \hspace{-.5em}\backslash\hspace{.1em}$}}}}
+\providecommand{\DPfeil}{\DDPfeil}
+\providecommand{\NDPfeil}{\NDDPfeil}
+\newcommand{\DDArrow}{\DDPfeil}
+\newcommand{\NDDArrow}{\NDDPfeil}
+\providecommand{\Semi}{\mathrel{\mbox{\tiny\rlap{\raisebox{2.0ex}%
+        {$\bigtriangledown$}}\raisebox{-0.0ex}{$\bigtriangleup$}}}}
+\def\ovee{\mbox{\small$\mathrel{\hspace{.35em}\raisebox{-1pt}%
+      {$\smash{\vee}$}\hspace*{-.835em}\bigcirc\hspace{.2em}}$}}
+\def\owedge{\mbox{\small$\mathrel{\hspace{.35em}\smash{\wedge}%
+      \hspace*{-.835em}\bigcirc\hspace{.2em}}$}}
+\providecommand{\ptimes}[1]{\mathrel{\stackrel{#1}{\times}}}
+\providecommand{\FCA}{Formal Concept Analysis\xspace}
+\providecommand{\FBA}{Formale Begriffsanalyse\xspace}
+\providecommand{\FnBA}{Formalen Begriffsanalyse\xspace}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\endinput
+%%
+%% End of file `fca.sty'.
