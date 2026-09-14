@@ -1,0 +1,20 @@
+# Entorno virtual
+envss/
+
+# Python
+__pycache__/
+*.py[cod]
+
+# macOS
+.DS_Store
+
+# Respaldos de editor
+*~
+
+# LaTeX
+*.aux
+*.log
+*.out
+
+# Configuración local de Claude Code (skills, permisos) — no se publica
+.claude/

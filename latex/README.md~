@@ -1,9 +1,0 @@
-fca_math produces a line diagram of the concept lattice of a formal context kk
-with    latexdiagram(kk).
-
-To do so fca_math writes a LaTeX file to the directory  " fca_math/latex ".
-The name of the file is   " pydiag.tex ". Then LaTeX is invoked to produce
-a PDF.
-
-This requires the LaTeX files fca.sty and tikzlibrary{fca}. Do not remove these from the folder.
-
